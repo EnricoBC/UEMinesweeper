@@ -8,7 +8,7 @@ The game is implemented as a plugin under the `Plugins/MinesweeperGame` folder, 
 - `Windows`: contains the minesweeper window's code.
 
 ## How to use
-1. Go to `Window -> Minesweeper`:
+1. Go to `Window -> Minesweeper` or click on the `Minesweeper` toolbar button:
 
 ![1.png](Images/1.png)
 
