@@ -1,11 +1,8 @@
-// Minesweeper.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
-#include "MinesweeperBoard.h"
+#include "Logic/MinesweeperBoard.h"
 
 void FMinesweeperBoard::GetNearbyCells(TSet<FCell*>& Cells, uint32 Row, uint32 Column)
 {
-    // adjacent cells
+    // Adjacent cells.
     FCell* Cell = GetCell(Row - 1, Column);
     if (Cell != nullptr) Cells.Add(Cell);
 
@@ -18,7 +15,7 @@ void FMinesweeperBoard::GetNearbyCells(TSet<FCell*>& Cells, uint32 Row, uint32 C
     Cell = GetCell(Row, Column + 1);
     if (Cell != nullptr) Cells.Add(Cell);
 
-    // diagonal cells
+    // Diagonal cells.
     Cell = GetCell(Row - 1, Column - 1);
     if (Cell != nullptr) Cells.Add(Cell);
 
@@ -36,7 +33,7 @@ void FMinesweeperBoard::Expand(uint32 Row, uint32 Column)
 {
     TSet<FCell*> CellsToUpdate;
 
-    // Initial cell to update
+    // Initial cell to update.
     FCell* Cell = GetCell(Row, Column);
 
     CellsToUpdate.Add(Cell);
@@ -113,11 +110,14 @@ FCell* FMinesweeperBoard::GetCell(uint32 Row, uint32 Column)
 
 void FMinesweeperBoard::Setup(uint32 Rows, uint32 Columns, uint32 Mines)
 {
-    // Clamp amount of mines to be less than rows * columns ()
     AmountOfRows = Rows;
     AmountOfColumns = Columns;
-    AmountOfMines = Mines;
 
+    // Clamp amount of mines to be less than rows * columns.
+    AmountOfMines = FMath::Clamp<uint32>(Mines, 1, (Rows * Columns) - 1);
+    TestedCells = 0;
+
+    // Reset flags.
     bStarted = false;
     bGameOver = false;
     bPlayerWon = false;
@@ -131,7 +131,6 @@ void FMinesweeperBoard::PlaceMines()
     {
         uint32 Row = FMath::RandRange(0, AmountOfRows - 1);
         uint32 Column = FMath::RandRange(0, AmountOfColumns - 1);
-        // uint32 Column = rand() % AmountOfColumns;
         while (!PlaceMine(Row, Column))
         {
             Row = FMath::RandRange(0, AmountOfRows - 1);
@@ -153,15 +152,12 @@ void FMinesweeperBoard::PlaceMines()
             TSet<FCell*> NearbyCells;
             GetNearbyCells(NearbyCells, Row, Column);
             uint32 MineCount = 0;
-            // for (auto It = NearbyCells.CreateConstIterator(); It; It++)
             for (auto& NearbyCell : NearbyCells)
             {
-                // FCell* NearbyCell = *It;
                 if (NearbyCell->CellType == ECellType::Mine)
                     MineCount++;
             }
             Cell->NearbyMines = MineCount;
-            // update number based on nearby mines
         }
 	}
 }
@@ -170,7 +166,7 @@ bool FMinesweeperBoard::TestCell(uint32 Row, uint32 Column)
 {
     auto Cell = GetCell(Row, Column);
 
-    // trigger the cell
+    // Test the cell, we return true immediately if a mine is found in this cell.
     if (SetCellTested(Cell)) return true;
 
     if (!bStarted)
@@ -179,7 +175,7 @@ bool FMinesweeperBoard::TestCell(uint32 Row, uint32 Column)
         bStarted = true;
     }
 
-    // expand all nearby cells
+    // Expand all nearby cells automatically.
     Expand(Row, Column);
     return false;
 }
